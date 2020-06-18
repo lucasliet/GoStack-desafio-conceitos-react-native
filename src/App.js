@@ -17,15 +17,18 @@ export default function App() {
     api.get('repositories').then(response =>
       setRepositories(response.data)
     );
-  },[])
+  }, [])
   async function handleLikeRepository(id) {
-    console.log(id)
-    const { data, data: { likes } } = await api.post(`repositories/${id}/like`);
-    const repositoryIndex = repositories.findIndex(repository => repository.id = id);
-    const updatedRepositories = [...repositories];
-    const updatedRepository = {...data, likes: likes + 1};
-    updatedRepositories[repositoryIndex] = updatedRepository
-    setRepositories(updatedRepositories);
+    try {
+      const { data: newRepo } = await api.post(`/repositories/${id}/like`);
+      setRepositories(
+        repositories.map((repository) =>
+          repository.id === id ? newRepo : repository
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -34,7 +37,7 @@ export default function App() {
       <SafeAreaView style={styles.container}>
         <FlatList
           data={repositories}
-        keyExtractor = {(repository => repository.id)}
+          keyExtractor={repository => repository.id}
           renderItem={({ item: repository }) => (
             <View style={styles.repositoryContainer}>
               <Text style={styles.repository}>{repository.title}</Text>
