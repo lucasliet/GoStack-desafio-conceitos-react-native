@@ -14,25 +14,29 @@ import api from "./services/api";
 export default function App() {
   const [repositories, setRepositories] = useState([]);
   useEffect(() => {
-    api.get('repositories').then(
+    api.get('repositories').then(response =>
       setRepositories(response.data)
     );
   },[])
   async function handleLikeRepository(id) {
-    const { data } = await api.post(`repositories/${id}/likes`);
-    const repository = {...data, likes: likes + 1}
-    setRepositories([...repositories,repository]);
+    console.log(id)
+    const { data, data: { likes } } = await api.post(`repositories/${id}/like`);
+    const repositoryIndex = repositories.findIndex(repository => repository.id = id);
+    const updatedRepositories = [...repositories];
+    const updatedRepository = {...data, likes: likes + 1};
+    updatedRepositories[repositoryIndex] = updatedRepository
+    setRepositories(updatedRepositories);
   }
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
       <SafeAreaView style={styles.container}>
-        <Text>Teste</Text>
         <FlatList
           data={repositories}
+        keyExtractor = {(repository => repository.id)}
           renderItem={({ item: repository }) => (
-            <View style={styles.repositoryContainer} key={repository.id}>
+            <View style={styles.repositoryContainer}>
               <Text style={styles.repository}>{repository.title}</Text>
 
               <View style={styles.techsContainer}>
